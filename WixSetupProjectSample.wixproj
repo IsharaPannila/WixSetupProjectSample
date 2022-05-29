@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project=".\packages\WiX.3.11.2\build\wix.props" Condition="Exists('.\packages\WiX.3.11.2\build\wix.props')" />
+  <Import Project=".\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.props" Condition="Exists('.\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.props')" />
+  <PropertyGroup>
+	<!-- We use the toolset from NuGet, instead of requiring it to be installed. This silences an "error" that isn't really an error. -->
+	<WixTargetsImported>true</WixTargetsImported>
+	<NuGetPackageImportStamp>
+	</NuGetPackageImportStamp>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -19,12 +27,23 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
+	<Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Product.wxs" />
   </ItemGroup>
-  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
-  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
-    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+ <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+ <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " /><Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+	<Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
+  </Target>
+  <Import Project=".\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.targets" Condition="Exists('.\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+	<PropertyGroup>
+		<ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+	</PropertyGroup>
+	<Error Condition="!Exists('.\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '.\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.props'))" />
+	<Error Condition="!Exists('.\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '.\packages\GitVersion.MsBuild.5.10.1\build\GitVersion.MsBuild.targets'))" />
+	<Error Condition="!Exists('.\packages\WiX.3.11.2\build\wix.props')" Text="$([System.String]::Format('$(ErrorText)', '.\packages\WiX.3.11.2\build\wix.props'))" />
   </Target>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
@@ -34,4 +53,4 @@
 	<Target Name="AfterBuild">
 	</Target>
 	-->
-</Project>
+  </Project>
